@@ -1,40 +1,30 @@
 import type { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
 import { Modules } from "@medusajs/framework/utils"
 
-export default async function orderPlacedHandler({
+export default async function orderUpdatedHandler({
   event: { data },
   container,
 }: SubscriberArgs<{ id: string }>) {
   const notificationService = container.resolve(Modules.NOTIFICATION)
   const orderService = container.resolve(Modules.ORDER)
 
-  const order = await orderService.retrieveOrder(data.id, {
-    relations: ["customer"],
-  })
+  const order = await orderService.retrieveOrder(data.id)
 
   if (!order.customer_id) {
     console.log(`El pedido ${order.id} no tiene customer asociado, se omite el email.`)
     return
   }
-  
+
   if (!order.email) return
-  // Email al comprador
+  // Notificamos al comprador que su pedido fue actualizado
   await notificationService.createNotifications({
     to: order.email,
     channel: "email",
-    template: "order-placed",
+    template: "order-updated",
     data: { order_id: order.id },
-  })
-
-  // Email al dueño
-  await notificationService.createNotifications({
-    to: process.env.OWNER_EMAIL!,
-    channel: "email",
-    template: "order-placed-owner",
-    data: { order_id: order.id, customer_email: order.email },
   })
 }
 
 export const config: SubscriberConfig = {
-  event: "order.placed",
+  event: "order.updated",
 }

@@ -1,13 +1,19 @@
 import type { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
-import { sendVerificationEmail } from "../lib/email"
+import { Modules } from "@medusajs/framework/utils"
 
 export default async function customerCreatedHandler({
   event: { data },
+  container,
 }: SubscriberArgs<{ id: string }>) {
-  // Medusa maneja el token de verificación internamente
-  // Este subscriber avisa al usuario que debe verificar
+  const notificationService = container.resolve(Modules.NOTIFICATION)
   const { id, email } = data as any
-  await sendVerificationEmail(email, id)
+
+  await notificationService.createNotifications({
+    to: email,
+    channel: "email",
+    template: "customer-created",
+    data: { customer_id: id },
+  })
 }
 
 export const config: SubscriberConfig = {

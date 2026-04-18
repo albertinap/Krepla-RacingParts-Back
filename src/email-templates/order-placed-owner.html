@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nuevo pedido recibido</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Geist:wght@400;500&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background-color: #111111; font-family: 'Geist', Arial, sans-serif; color: #ffffff; }
+    .wrapper { max-width: 600px; margin: 0 auto; background-color: #111111; }
+    .header { background-color: #000000; padding: 32px 40px; border-bottom: 3px solid #E32636; display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-family: 'Oswald', Arial, sans-serif; font-size: 22px; font-weight: 600; color: #ffffff; letter-spacing: 2px; text-transform: uppercase; }
+    .logo span { color: #E32636; }
+    .admin-badge { font-size: 11px; color: #555555; text-transform: uppercase; letter-spacing: 1.5px; }
+    .hero { background-color: #E32636; padding: 32px 40px; }
+    .hero-title { font-family: 'Oswald', Arial, sans-serif; font-size: 26px; font-weight: 600; color: #ffffff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .hero-subtitle { font-size: 14px; color: rgba(255,255,255,0.75); }
+    .body { padding: 40px; background-color: #111111; }
+    .section-label { font-size: 11px; font-weight: 500; color: #E32636; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; }
+    .order-meta { background-color: #000000; padding: 20px 24px; margin-bottom: 32px; }
+    .meta-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #1a1a1a; }
+    .meta-row:last-child { border-bottom: none; }
+    .meta-key { font-size: 13px; color: #666666; }
+    .meta-value { font-size: 13px; color: #ffffff; font-weight: 500; }
+    .items-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+    .items-table th { font-size: 11px; color: #555555; text-transform: uppercase; letter-spacing: 1.5px; text-align: left; padding: 0 0 10px; border-bottom: 1px solid #222222; }
+    .items-table td { font-size: 14px; color: #cccccc; padding: 12px 0; border-bottom: 1px solid #1a1a1a; vertical-align: top; }
+    .items-table td.right { text-align: right; color: #ffffff; }
+    .total-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-top: 1px solid #333333; }
+    .total-label { font-family: 'Oswald', Arial, sans-serif; font-size: 15px; color: #aaaaaa; text-transform: uppercase; letter-spacing: 1px; }
+    .total-value { font-family: 'Oswald', Arial, sans-serif; font-size: 22px; font-weight: 600; color: #E32636; }
+    .divider { border: none; border-top: 1px solid #222222; margin: 32px 0; }
+    .info-block { margin-bottom: 20px; }
+    .info-label { font-size: 11px; font-weight: 500; color: #E32636; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+    .info-text { font-size: 14px; color: #cccccc; line-height: 1.6; }
+    .footer { background-color: #000000; padding: 24px 40px; border-top: 1px solid #1a1a1a; text-align: center; }
+    .footer-text { font-size: 12px; color: #555555; line-height: 1.8; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <div class="logo">Krepla <span>Racing</span> Parts</div>
+      <div class="admin-badge">Panel interno</div>
+    </div>
+
+    <div class="hero">
+      <div class="hero-title">Nuevo pedido recibido</div>
+      <div class="hero-subtitle">Se realizó una compra en la tienda</div>
+    </div>
+
+    <div class="body">
+      <div class="section-label">Datos del pedido</div>
+      <div class="order-meta">
+        <div class="meta-row">
+          <span class="meta-key">Número de pedido</span>
+          <span class="meta-value">#{{order_id}}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key">Fecha</span>
+          <span class="meta-value">{{order_date}}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key">Cliente</span>
+          <span class="meta-value">{{customer_name}}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key">Email del cliente</span>
+          <span class="meta-value">{{customer_email}}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key">Teléfono</span>
+          <span class="meta-value">{{customer_phone}}</span>
+        </div>
+      </div>
+
+      <div class="section-label">Productos</div>
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th style="text-align:right;">Cant.</th>
+            <th style="text-align:right;">Precio</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each items}}
+          <tr>
+            <td>{{this.title}}</td>
+            <td class="right">{{this.quantity}}</td>
+            <td class="right">{{this.unit_price}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+
+      <div class="total-row">
+        <span class="total-label">Total</span>
+        <span class="total-value">{{order_total}}</span>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="info-block">
+        <div class="info-label">Dirección de envío</div>
+        <div class="info-text">{{shipping_address}}</div>
+      </div>
+
+      <div class="info-block">
+        <div class="info-label">Método de pago</div>
+        <div class="info-text">{{payment_method}}</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-text">Notificación automática · Krepla Racing Parts</div>
+    </div>
+  </div>
+</body>
+</html>

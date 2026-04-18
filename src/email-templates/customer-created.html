@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bienvenido a Krepla Racing Parts</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Geist:wght@400;500&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background-color: #111111; font-family: 'Geist', Arial, sans-serif; color: #ffffff; }
+    .wrapper { max-width: 600px; margin: 0 auto; background-color: #111111; }
+    .header { background-color: #000000; padding: 32px 40px; border-bottom: 3px solid #E32636; }
+    .logo { font-family: 'Oswald', Arial, sans-serif; font-size: 22px; font-weight: 600; color: #ffffff; letter-spacing: 2px; text-transform: uppercase; }
+    .logo span { color: #E32636; }
+    .hero { background-color: #000000; padding: 48px 40px 40px; }
+    .hero-title { font-family: 'Oswald', Arial, sans-serif; font-size: 28px; font-weight: 600; color: #ffffff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+    .hero-subtitle { font-size: 16px; color: #aaaaaa; line-height: 1.6; margin-bottom: 32px; }
+    .cta-button { display: inline-block; background-color: #E32636; color: #ffffff; font-family: 'Oswald', Arial, sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; padding: 14px 32px; text-decoration: none; }
+    .body { padding: 40px; background-color: #111111; }
+    .divider { border: none; border-top: 1px solid #222222; margin: 32px 0; }
+    .info-block { margin-bottom: 24px; }
+    .info-label { font-size: 11px; font-weight: 500; color: #E32636; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+    .info-text { font-size: 15px; color: #cccccc; line-height: 1.6; }
+    .footer { background-color: #000000; padding: 24px 40px; border-top: 1px solid #1a1a1a; text-align: center; }
+    .footer-text { font-size: 12px; color: #555555; line-height: 1.8; }
+    .footer-brand { font-family: 'Oswald', Arial, sans-serif; font-size: 13px; color: #888888; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <div class="logo">Krepla <span>Racing</span> Parts</div>
+    </div>
+
+    <div class="hero">
+      <div class="hero-title">Bienvenido al equipo</div>
+      <div class="hero-subtitle">
+        Tu cuenta fue creada exitosamente. Ya podés explorar nuestro catálogo de repuestos y accesorios para motos.
+      </div>
+      <a href="{{store_url}}" class="cta-button">Ir a la tienda</a>
+    </div>
+
+    <div class="body">
+      <hr class="divider" />
+
+      <div class="info-block">
+        <div class="info-label">Tu cuenta</div>
+        <div class="info-text">{{customer_email}}</div>
+      </div>
+
+      <div class="info-block">
+        <div class="info-label">¿Qué podés hacer ahora?</div>
+        <div class="info-text">
+          Explorá nuestro catálogo, agregá productos al carrito y realizá tu primera compra. Envíos a todo el país.
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="info-block">
+        <div class="info-label">¿Necesitás ayuda?</div>
+        <div class="info-text">
+          Respondé este email o contactanos y te ayudamos con lo que necesites.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-brand">Krepla Racing Parts</div>
+      <div class="footer-text">
+        Recibiste este email porque creaste una cuenta en nuestra tienda.<br />
+        Si no fuiste vos, podés ignorar este mensaje.
+      </div>
+    </div>
+  </div>
+</body>
+</html>
