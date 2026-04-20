@@ -2,7 +2,7 @@ import { AbstractPaymentProvider } from "@medusajs/framework/utils"
 import { BigNumberInput } from "@medusajs/types"
 
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN || null
-
+console.log("[MP] Token cargado:", process.env.MP_ACCESS_TOKEN?.substring(0, 20))
 type InitiatePaymentContext = {
   amount: BigNumberInput
   currency_code: string
@@ -18,7 +18,7 @@ export default class MercadoPagoPaymentProvider extends AbstractPaymentProvider 
     input: Parameters<AbstractPaymentProvider["initiatePayment"]>[0]
   ): ReturnType<AbstractPaymentProvider["initiatePayment"]> {
     const items = (input.context as InitiatePaymentContext["context"] | undefined)?.items
-
+    console.log("[MP] ACCESS TOKEN presente:", !!MP_ACCESS_TOKEN)
     if (!MP_ACCESS_TOKEN) {
       return {
         id: "mercadopago_mock_preference",
@@ -28,7 +28,7 @@ export default class MercadoPagoPaymentProvider extends AbstractPaymentProvider 
         },
       }
     }
-
+    console.log("[MP] FRONTEND_URL:", process.env.FRONTEND_URL)
     const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",
       headers: {
@@ -36,29 +36,32 @@ export default class MercadoPagoPaymentProvider extends AbstractPaymentProvider 
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        items: items?.map((item) => ({
-          title: item.title,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          currency_id: "ARS",
-        })),
-        payment_methods: {
-          excluded_payment_types: [
-            { id: "credit_card" },
-            { id: "ticket" },
-          ],
-        },
+        items: items?.length
+          ? items.map((item) => ({
+              title: item.title,
+              quantity: Number(item.quantity),
+              unit_price: Number(item.unit_price),
+              currency_id: "ARS",
+            }))
+          : [
+              {
+                title: "Compra en Krepla Racing Parts",
+                quantity: 1,
+                unit_price: Number(input.amount),
+                currency_id: "ARS",
+              }
+            ],
         back_urls: {
-          success: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/checkout/success`,
-          failure: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/checkout/failure`,
-          pending: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/checkout/pending`,
+          success: `${process.env.FRONTEND_URL}/checkout/success`,
+          failure: `${process.env.FRONTEND_URL}/checkout/failure`,
+          pending: `${process.env.FRONTEND_URL}/checkout/pending`,
         },
-        auto_return: "approved",
-        notification_url: `${process.env.BACKEND_URL}/webhooks/mercadopago`,
       }),
     })
 
     const data = await response.json()
+    console.log("[MP] Preference creada:", JSON.stringify(data))
+    console.log("[MP] Response:", JSON.stringify(data))
     const preferenceId = String(data?.id ?? "mercadopago_preference")
 
     return {
@@ -101,7 +104,7 @@ export default class MercadoPagoPaymentProvider extends AbstractPaymentProvider 
   ): ReturnType<AbstractPaymentProvider["refundPayment"]> {
     const paymentSessionData = input.data ?? {}
     const refundAmount = input.amount
-    if (!MP_ACCESS_TOKEN) return { ...paymentSessionData }
+    if (!MP_ACCESS_TOKEN) return { ...paymentSessionData }    
 
     await fetch(`https://api.mercadopago.com/v1/payments/${paymentSessionData.paymentId}/refunds`, {
       method: "POST",
