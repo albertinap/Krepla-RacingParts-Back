@@ -12,7 +12,7 @@ export default async function customerCreatedHandler({
     to: email,
     channel: "email",
     template: "customer-created",
-    data: { customer_id: id },
+    data: { customer_email: email, store_url: process.env.NEXT_PUBLIC_MEDUSA_URL || "https://krepla-racing-parts.onrender.com" },
   })
 }
 

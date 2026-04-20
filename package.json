@@ -26,6 +26,7 @@
     "@medusajs/cli": "2.13.1",
     "@medusajs/framework": "2.13.1",
     "@medusajs/medusa": "2.13.1",
+    "handlebars": "^4.7.9",
     "nodemailer": "^8.0.5",
     "resend": "^6.10.0"
   },
@@ -33,6 +34,7 @@
     "@medusajs/test-utils": "2.13.1",
     "@swc/core": "^1.7.28",
     "@swc/jest": "^0.2.36",
+    "@types/handlebars": "^4.0.40",
     "@types/jest": "^29.5.13",
     "@types/node": "^20.12.11",
     "@types/nodemailer": "^8.0.0",

@@ -2,6 +2,7 @@ import { AbstractNotificationProviderService } from "@medusajs/framework/utils"
 import nodemailer from "nodemailer"
 import fs from "fs"
 import path from "path"
+import Handlebars from "handlebars"
 
 type SmtpOptions = {
   from: string
@@ -30,27 +31,25 @@ class SmtpNotificationService extends AbstractNotificationProviderService {
 
   async send(notification: any): Promise<any> {
     const { to, template, data } = notification
-
+  
     const templatePath = path.join(
       process.cwd(),
       "src",
       "email-templates",
       `${template}.html`
     )
-
-    let html = fs.readFileSync(templatePath, "utf-8")
-
-    for (const [key, value] of Object.entries(data || {})) {
-      html = html.replace(new RegExp(`{{${key}}}`, "g"), String(value ?? ""))
-    }
-
+  
+    const source = fs.readFileSync(templatePath, "utf-8")
+    const compiled = Handlebars.compile(source)
+    const html = compiled(data || {})
+  
     await this.transporter.sendMail({
       from: this.from,
       to,
       subject: this.getSubject(template),
       html,
     })
-
+  
     return { id: `smtp-${Date.now()}` }
   }
 
