@@ -54,15 +54,23 @@ module.exports = defineConfig({
       },
     },
     {
-      resolve: "@medusajs/file-s3",
+      resolve: "@medusajs/medusa/file",
       options: {
-        file_url: process.env.SUPABASE_STORAGE_URL,
-        access_key_id: process.env.SUPABASE_STORAGE_ACCESS_KEY,
-        secret_access_key: process.env.SUPABASE_STORAGE_SECRET_KEY,
-        region: "us-east-1", // Supabase requiere este valor aunque no lo use
-        bucket: process.env.SUPABASE_STORAGE_BUCKET,
-        endpoint: process.env.SUPABASE_STORAGE_ENDPOINT,
+        providers: [
+          {
+            resolve: "@medusajs/file-s3",
+            id: "s3",
+            options: {
+              file_url: process.env.SUPABASE_STORAGE_URL,
+              access_key_id: process.env.SUPABASE_STORAGE_ACCESS_KEY,
+              secret_access_key: process.env.SUPABASE_STORAGE_SECRET_KEY,
+              region: "us-east-1",
+              bucket: process.env.SUPABASE_STORAGE_BUCKET,
+              endpoint: process.env.SUPABASE_STORAGE_ENDPOINT,
+            },
+          },
+        ],
       },
-    },  
+    }, 
   ],  
 })

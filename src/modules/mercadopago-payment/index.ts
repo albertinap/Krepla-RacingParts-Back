@@ -2,6 +2,8 @@ import { AbstractPaymentProvider } from "@medusajs/framework/utils"
 import { BigNumberInput } from "@medusajs/types"
 
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN || null
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000"
+
 console.log("[MP] Token cargado:", process.env.MP_ACCESS_TOKEN?.substring(0, 20))
 type InitiatePaymentContext = {
   amount: BigNumberInput
@@ -28,7 +30,7 @@ export default class MercadoPagoPaymentProvider extends AbstractPaymentProvider 
         },
       }
     }
-    console.log("[MP] FRONTEND_URL:", process.env.FRONTEND_URL)
+    console.log("[MP] FRONTEND_URL:", frontendUrl)
     const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",
       headers: {
@@ -51,15 +53,17 @@ export default class MercadoPagoPaymentProvider extends AbstractPaymentProvider 
                 currency_id: "ARS",
               }
             ],
-        back_urls: {
-          success: `${process.env.FRONTEND_URL}/checkout/success`,
-          failure: `${process.env.FRONTEND_URL}/checkout/failure`,
-          pending: `${process.env.FRONTEND_URL}/checkout/pending`,
-        },
+          back_urls: {
+            success: `${frontendUrl}/checkout/success`,
+            failure: `${frontendUrl}/checkout/failure`,
+            pending: `${frontendUrl}/checkout/pending`,
+          },
       }),
     })
 
     const data = await response.json()
+    console.log("[MP] HTTP status:", response.status)
+    console.log("[MP] Response completo:", JSON.stringify(data))
     console.log("[MP] Preference creada:", JSON.stringify(data))
     console.log("[MP] Response:", JSON.stringify(data))
     const preferenceId = String(data?.id ?? "mercadopago_preference")
@@ -69,7 +73,7 @@ export default class MercadoPagoPaymentProvider extends AbstractPaymentProvider 
       data: {
         status: "pending",
         preferenceId,
-        checkoutUrl: data.init_point,
+        checkoutUrl: process.env.MP_ACCESS_TOKEN?.startsWith("TEST-") ? data.sandbox_init_point : data.init_point,
       },
     }
   }
@@ -78,12 +82,31 @@ export default class MercadoPagoPaymentProvider extends AbstractPaymentProvider 
     input: Parameters<AbstractPaymentProvider["authorizePayment"]>[0]
   ): ReturnType<AbstractPaymentProvider["authorizePayment"]> {
     const paymentSessionData = input.data ?? {}
-    const mpStatus = (paymentSessionData.mp_status ?? paymentSessionData.status) as
-      | string
-      | undefined
-    if (mpStatus === "approved") {
-      return { status: "authorized", data: { ...paymentSessionData } }
+    const preferenceId = paymentSessionData.preferenceId as string | undefined
+  
+    if (!preferenceId || preferenceId === "mercadopago_preference" || !MP_ACCESS_TOKEN) {
+      return { status: "pending", data: { ...paymentSessionData } }
     }
+  
+    const res = await fetch(`https://api.mercadopago.com/checkout/preferences/${preferenceId}`, {
+      headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` }
+    })
+    const preference = await res.json()
+    console.log("[MP] authorizePayment preference:", JSON.stringify(preference))
+  
+    // Buscar pagos asociados a esta preference
+    const paymentsRes = await fetch(
+      `https://api.mercadopago.com/v1/payments/search?preference_id=${preferenceId}`,
+      { headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` } }
+    )
+    const paymentsData = await paymentsRes.json()
+    console.log("[MP] payments search:", JSON.stringify(paymentsData))
+  
+    const payment = paymentsData?.results?.[0]
+    if (payment?.status === "approved") {
+      return { status: "authorized", data: { ...paymentSessionData, mp_status: "approved", paymentId: payment.id } }
+    }
+  
     return { status: "pending", data: { ...paymentSessionData } }
   }
 
