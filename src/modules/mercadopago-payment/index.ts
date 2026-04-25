@@ -82,29 +82,23 @@ export default class MercadoPagoPaymentProvider extends AbstractPaymentProvider 
     input: Parameters<AbstractPaymentProvider["authorizePayment"]>[0]
   ): ReturnType<AbstractPaymentProvider["authorizePayment"]> {
     const paymentSessionData = input.data ?? {}
-    const preferenceId = paymentSessionData.preferenceId as string | undefined
+    const paymentId = paymentSessionData.mp_payment_id as string | undefined
   
-    if (!preferenceId || preferenceId === "mercadopago_preference" || !MP_ACCESS_TOKEN) {
+    if (!paymentId || !MP_ACCESS_TOKEN) {
       return { status: "pending", data: { ...paymentSessionData } }
     }
   
-    const res = await fetch(`https://api.mercadopago.com/checkout/preferences/${preferenceId}`, {
+    const res = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
       headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` }
     })
-    const preference = await res.json()
-    console.log("[MP] authorizePayment preference:", JSON.stringify(preference))
+    const payment = await res.json()
+    console.log("[MP] authorizePayment payment directo:", JSON.stringify(payment))
   
-    // Buscar pagos asociados a esta preference
-    const paymentsRes = await fetch(
-      `https://api.mercadopago.com/v1/payments/search?preference_id=${preferenceId}`,
-      { headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` } }
-    )
-    const paymentsData = await paymentsRes.json()
-    console.log("[MP] payments search:", JSON.stringify(paymentsData))
-  
-    const payment = paymentsData?.results?.[0]
     if (payment?.status === "approved") {
-      return { status: "authorized", data: { ...paymentSessionData, mp_status: "approved", paymentId: payment.id } }
+      return {
+        status: "authorized",
+        data: { ...paymentSessionData, mp_status: "approved", paymentId: payment.id }
+      }
     }
   
     return { status: "pending", data: { ...paymentSessionData } }
