@@ -33,8 +33,9 @@ class SmtpNotificationService extends AbstractNotificationProviderService {
     const { to, template, data } = notification
   
     const templatePath = path.join(
-      process.cwd(),
-      "src",
+      __dirname,
+      "..",
+      "..",
       "email-templates",
       `${template}.html`
     )
