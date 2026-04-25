@@ -11,7 +11,8 @@ module.exports = defineConfig({
       authCors: process.env.AUTH_CORS!,
       jwtSecret: process.env.JWT_SECRET || "supersecret",
       cookieSecret: process.env.COOKIE_SECRET || "supersecret",
-    }
+      uploadSizeLimitInBytes: 5242880, //5MB
+    } as any,
   },
   modules: [
     {
@@ -67,10 +68,13 @@ module.exports = defineConfig({
               region: "us-east-1",
               bucket: process.env.SUPABASE_STORAGE_BUCKET,
               endpoint: process.env.SUPABASE_STORAGE_ENDPOINT,
+              additional_client_config: {
+                forcePathStyle: true,
+              },
             },
-          },
+          } as any,
         ],
       },
-    }, 
+    },
   ],  
 })
