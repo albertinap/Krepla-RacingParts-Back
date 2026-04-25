@@ -31,6 +31,8 @@ export default class MercadoPagoPaymentProvider extends AbstractPaymentProvider 
       }
     }
     console.log("[MP] FRONTEND_URL:", frontendUrl)
+    const tempId = `krp_${Date.now()}`
+
     const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",
       headers: {
@@ -38,6 +40,7 @@ export default class MercadoPagoPaymentProvider extends AbstractPaymentProvider 
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        external_reference: tempId,
         items: items?.length
           ? items.map((item) => ({
               title: item.title,
@@ -53,19 +56,18 @@ export default class MercadoPagoPaymentProvider extends AbstractPaymentProvider 
                 currency_id: "ARS",
               }
             ],
-          back_urls: {
-            success: `${frontendUrl}/checkout/success`,
-            failure: `${frontendUrl}/checkout/failure`,
-            pending: `${frontendUrl}/checkout/pending`,
-          },
+        back_urls: {
+          success: `${frontendUrl}/checkout/success`,
+          failure: `${frontendUrl}/checkout/failure`,
+          pending: `${frontendUrl}/checkout/pending`,
+        },
       }),
     })
 
     const data = await response.json()
     console.log("[MP] HTTP status:", response.status)
-    console.log("[MP] Response completo:", JSON.stringify(data))
     console.log("[MP] Preference creada:", JSON.stringify(data))
-    console.log("[MP] Response:", JSON.stringify(data))
+
     const preferenceId = String(data?.id ?? "mercadopago_preference")
 
     return {
@@ -73,6 +75,7 @@ export default class MercadoPagoPaymentProvider extends AbstractPaymentProvider 
       data: {
         status: "pending",
         preferenceId,
+        externalReference: tempId,
         checkoutUrl: process.env.MP_ACCESS_TOKEN?.startsWith("TEST-") ? data.sandbox_init_point : data.init_point,
       },
     }
@@ -82,21 +85,21 @@ export default class MercadoPagoPaymentProvider extends AbstractPaymentProvider 
     input: Parameters<AbstractPaymentProvider["authorizePayment"]>[0]
   ): ReturnType<AbstractPaymentProvider["authorizePayment"]> {
     const paymentSessionData = input.data ?? {}
-    const preferenceId = paymentSessionData.preferenceId as string | undefined
+    const externalReference = paymentSessionData.externalReference as string | undefined
   
-    if (!preferenceId || !MP_ACCESS_TOKEN) {
+    if (!externalReference || !MP_ACCESS_TOKEN) {
       return { status: "pending", data: { ...paymentSessionData } }
     }
   
     const paymentsRes = await fetch(
-      `https://api.mercadopago.com/v1/payments/search?preference_id=${preferenceId}&status=approved`,
+      `https://api.mercadopago.com/v1/payments/search?external_reference=${externalReference}`,
       { headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` } }
     )
     const paymentsData = await paymentsRes.json()
     console.log("[MP] paymentsData completo:", JSON.stringify(paymentsData))
-    console.log("[MP] preferenceId usado:", preferenceId)
-    const payment = paymentsData?.results?.[0]
+    console.log("[MP] externalReference usado:", externalReference)
   
+    const payment = paymentsData?.results?.[0]
     console.log("[MP] authorizePayment search result:", JSON.stringify(payment))
   
     if (payment?.status === "approved") {
