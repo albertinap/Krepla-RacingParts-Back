@@ -22,10 +22,7 @@ export default async function orderPlacedHandler({
   console.log("[ORDER TOTAL]", order.total, typeof order.total)
   console.log("[ITEM]", JSON.stringify(order.items?.[0]))
 
-  if (!order.customer_id) {
-    console.log(`El pedido ${order.id} no tiene customer asociado, se omite el email.`)
-    return
-  }
+  if (!order.email) return
   
   if (!order.email) return
   // Email al comprador
