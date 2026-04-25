@@ -93,6 +93,8 @@ export default class MercadoPagoPaymentProvider extends AbstractPaymentProvider 
       { headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` } }
     )
     const paymentsData = await paymentsRes.json()
+    console.log("[MP] paymentsData completo:", JSON.stringify(paymentsData))
+    console.log("[MP] preferenceId usado:", preferenceId)
     const payment = paymentsData?.results?.[0]
   
     console.log("[MP] authorizePayment search result:", JSON.stringify(payment))
