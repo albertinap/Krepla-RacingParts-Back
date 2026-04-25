@@ -82,17 +82,20 @@ export default class MercadoPagoPaymentProvider extends AbstractPaymentProvider 
     input: Parameters<AbstractPaymentProvider["authorizePayment"]>[0]
   ): ReturnType<AbstractPaymentProvider["authorizePayment"]> {
     const paymentSessionData = input.data ?? {}
-    const paymentId = paymentSessionData.mp_payment_id as string | undefined
+    const preferenceId = paymentSessionData.preferenceId as string | undefined
   
-    if (!paymentId || !MP_ACCESS_TOKEN) {
+    if (!preferenceId || !MP_ACCESS_TOKEN) {
       return { status: "pending", data: { ...paymentSessionData } }
     }
   
-    const res = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
-      headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` }
-    })
-    const payment = await res.json()
-    console.log("[MP] authorizePayment payment directo:", JSON.stringify(payment))
+    const paymentsRes = await fetch(
+      `https://api.mercadopago.com/v1/payments/search?preference_id=${preferenceId}&status=approved`,
+      { headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` } }
+    )
+    const paymentsData = await paymentsRes.json()
+    const payment = paymentsData?.results?.[0]
+  
+    console.log("[MP] authorizePayment search result:", JSON.stringify(payment))
   
     if (payment?.status === "approved") {
       return {
