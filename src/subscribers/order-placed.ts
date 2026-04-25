@@ -10,10 +10,6 @@ export default async function orderPlacedHandler({
 
   const order = await orderService.retrieveOrder(data.id, {
     relations: ["items", "shipping_address"],
-    select: ["id", "email", "customer_id", "created_at", "total", "currency_code",
-      "shipping_address.first_name", "shipping_address.last_name",
-      "shipping_address.address_1", "shipping_address.city", "shipping_address.phone",
-      "items.title", "items.quantity", "items.unit_price"],
   })
   const orderTotal = order.items?.reduce(
     (sum, item) => sum + Number(item.raw_unit_price?.value ?? 0) * (item.quantity ?? 1), 0
@@ -21,8 +17,6 @@ export default async function orderPlacedHandler({
 
   console.log("[ORDER TOTAL]", order.total, typeof order.total)
   console.log("[ITEM]", JSON.stringify(order.items?.[0]))
-
-  if (!order.email) return
   
   if (!order.email) return
   // Email al comprador
