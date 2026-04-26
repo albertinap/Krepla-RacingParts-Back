@@ -41,8 +41,15 @@ class SmtpNotificationService extends AbstractNotificationProviderService {
     )
   
     const source = fs.readFileSync(templatePath, "utf-8")
+    console.log("[SMTP] source length:", source.length)
+    console.log("[SMTP] source preview:", source.substring(0, 100))
     const compiled = Handlebars.compile(source)
     const html = compiled(data || {})
+    console.log("[SMTP] html length:", html.length)
+    console.log("[SMTP] html preview:", html.substring(0, 200))
+    console.log("[SMTP] template:", template)
+    console.log("[SMTP] templatePath:", templatePath)
+    console.log("[SMTP] exists:", fs.existsSync(templatePath))
   
     await this.transporter.sendMail({
       from: this.from,
